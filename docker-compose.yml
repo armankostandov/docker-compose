@@ -1,0 +1,46 @@
+version: "3.9"
+
+services:
+  
+  database:
+    image: postgres:11
+    container_name: database
+    hostname: database
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_PASSWORD: postgres
+    volumes:
+      - ./database:/var/lib/postgresql/data
+    networks:
+      - bridged_network
+  
+  ibmmq:
+    image: ibmcom/mq:9.2.4.0-r1
+    container_name: ibmmq
+    hostname: ibmmq
+    ports:
+      - 1414:1414
+      - 9443:9443
+    environment:
+      LICENSE: accept
+      MQ_QMGR_NAME: QM1
+    volumes:
+      - ./ibmmq:/mnt/mqm
+    networks:
+      - bridged_network
+
+  activemq:
+    image: rmohr/activemq:5.10.0
+    container_name: activemq
+    environment:
+      - "TZ=Europe/Amsterdam"
+    volumes:
+      - "./activemq/activemq.xml:/conf/activemq.xml"
+    ports:
+      - "61616:61616" # broker (admin:adminactivemq)(amq:amq)
+      - "8161:8161"   # web    http://boot2docker:8161/admin (admin:admin)
+
+networks:
+  bridged_network:
+    driver: bridge
